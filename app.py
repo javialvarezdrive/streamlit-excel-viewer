@@ -16,6 +16,10 @@ if uploaded_file is not None:
     try:
         df = pd.read_excel(uploaded_file, engine='openpyxl')
 
+        # Asegurarse de que la columna de tiempo esté en formato datetime
+        if 'Tiempo' in df.columns:
+            df['Tiempo'] = pd.to_datetime(df['Tiempo'])
+
         # Definir filtros por defecto
         filters = {
             'Categoria': 'Todos',
@@ -33,6 +37,18 @@ if uploaded_file is not None:
             if 'Genero' in df.columns:
                 filters['Genero'] = st.selectbox('Filtrar por Genero', options=['Todos'] + df['Genero'].unique().tolist())
 
+            # Filtro de rango de tiempo
+            if 'Tiempo' in df.columns:
+                min_time = df['Tiempo'].min()
+                max_time = df['Tiempo'].max()
+                time_range = st.slider(
+                    'Selecciona el rango de tiempo',
+                    min_value=min_time,
+                    max_value=max_time,
+                    value=(min_time, max_time),
+                    format="YYYY-MM-DD HH:mm:ss"
+                )
+
             # Botón para limpiar filtros
             if st.button('Limpiar Filtros'):
                 filters = {key: 'Todos' for key in filters}
@@ -45,6 +61,8 @@ if uploaded_file is not None:
             filtered_df = filtered_df[filtered_df['Club'] == filters['Club']]
         if filters['Genero'] != 'Todos':
             filtered_df = filtered_df[filtered_df['Genero'] == filters['Genero']]
+        if 'Tiempo' in df.columns:
+            filtered_df = filtered_df[(filtered_df['Tiempo'] >= time_range[0]) & (filtered_df['Tiempo'] <= time_range[1])]
 
         # Selección de columnas a mostrar
         st.write("Selecciona las columnas que deseas ver:")
