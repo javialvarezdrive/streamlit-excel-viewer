@@ -16,11 +16,6 @@ if uploaded_file is not None:
     try:
         df = pd.read_excel(uploaded_file, engine='openpyxl')
 
-        # Verificar si la columna de tiempo está presente y convertir a timedelta
-        if 'Tiempo' in df.columns:
-            # Convertir la columna de tiempo a timedelta
-            df['Tiempo'] = pd.to_timedelta(df['Tiempo'].astype(str), errors='coerce')
-
         # Definir filtros por defecto
         filters = {
             'Categoria': 'Todos',
@@ -32,27 +27,11 @@ if uploaded_file is not None:
         with st.sidebar.expander("Filtros", expanded=True):
             # Filtros dinámicos basados en los valores únicos de las columnas
             if 'Categoria' in df.columns:
-                filters['Categoria'] = st.selectbox('Filtrar por Categoria', options=['Todos'] + df['Categoria'].dropna().unique().tolist())
+                filters['Categoria'] = st.selectbox('Filtrar por Categoria', options=['Todos'] + df['Categoria'].unique().tolist())
             if 'Club' in df.columns:
-                filters['Club'] = st.selectbox('Filtrar por Club', options=['Todos'] + df['Club'].dropna().unique().tolist())
+                filters['Club'] = st.selectbox('Filtrar por Club', options=['Todos'] + df['Club'].unique().tolist())
             if 'Genero' in df.columns:
-                filters['Genero'] = st.selectbox('Filtrar por Genero', options=['Todos'] + df['Genero'].dropna().unique().tolist())
-
-            # Filtro de rango de tiempo
-            if 'Tiempo' in df.columns:
-                min_time = df['Tiempo'].min()
-                max_time = df['Tiempo'].max()
-                # Comprobar que los valores de min_time y max_time no son NaT
-                if pd.notnull(min_time) and pd.notnull(max_time):
-                    time_range = st.slider(
-                        'Selecciona el rango de tiempo',
-                        min_value=min_time,
-                        max_value=max_time,
-                        value=(min_time, max_time),
-                        format="hh:mm:ss"
-                    )
-                else:
-                    st.warning('No se puede aplicar el filtro de tiempo debido a valores nulos.')
+                filters['Genero'] = st.selectbox('Filtrar por Genero', options=['Todos'] + df['Genero'].unique().tolist())
 
             # Botón para limpiar filtros
             if st.button('Limpiar Filtros'):
@@ -66,8 +45,6 @@ if uploaded_file is not None:
             filtered_df = filtered_df[filtered_df['Club'] == filters['Club']]
         if filters['Genero'] != 'Todos':
             filtered_df = filtered_df[filtered_df['Genero'] == filters['Genero']]
-        if 'Tiempo' in df.columns and 'time_range' in locals():
-            filtered_df = filtered_df[(filtered_df['Tiempo'] >= time_range[0]) & (filtered_df['Tiempo'] <= time_range[1])]
 
         # Selección de columnas a mostrar
         st.write("Selecciona las columnas que deseas ver:")
