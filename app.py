@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 
 # Configuración de la página para ocupar todo el ancho
 st.set_page_config(layout="wide")
@@ -23,6 +24,10 @@ if uploaded_file is not None:
     # Leer el archivo Excel
     try:
         df = pd.read_excel(uploaded_file, engine='openpyxl')
+
+        # Convertir la columna de tiempo a timedelta si existe
+        if 'Tiempo' in df.columns:
+            df['Tiempo'] = pd.to_timedelta(df['Tiempo'].astype(str), errors='coerce')
 
         # Definir filtros por defecto
         filters = {
@@ -65,6 +70,20 @@ if uploaded_file is not None:
         # Mostrar los datos filtrados con las columnas seleccionadas
         st.write("Datos:")
         st.dataframe(filtered_df[columnas_seleccionadas], use_container_width=True)
+
+        # Mostrar el gráfico de tiempos medios por categoría
+        if 'Tiempo' in filtered_df.columns and 'Categoria' in filtered_df.columns:
+            st.write("Gráfico de Tiempos Medios por Categoría")
+
+            # Calcular tiempos medios por categoría
+            mean_times = filtered_df.groupby('Categoria')['Tiempo'].mean().reset_index()
+
+            # Convertir el tiempo medio a segundos para el gráfico
+            mean_times['Tiempo'] = mean_times['Tiempo'].dt.total_seconds()
+
+            # Crear gráfico de barras
+            fig = px.bar(mean_times, x='Categoria', y='Tiempo', labels={'Tiempo': 'Tiempo Medio (segundos)'}, title='Tiempos Medios por Categoría')
+            st.plotly_chart(fig, use_container_width=True)
 
     except Exception as e:
         st.error(f"Error al leer el archivo: {e}")
