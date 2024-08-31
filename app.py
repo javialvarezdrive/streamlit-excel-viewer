@@ -1,6 +1,9 @@
 import streamlit as st
 import pandas as pd
 
+# Configuración de la página para ocupar todo el ancho
+st.set_page_config(layout="wide")
+
 # Configuración básica de la aplicación
 st.title('Visualización de Datos de Excel')
 st.write('Sube tu archivo Excel para visualizar y filtrar los datos.')
@@ -15,7 +18,7 @@ if uploaded_file is not None:
 
         # Mostrar los datos cargados
         st.write("Datos cargados:")
-        st.dataframe(df)
+        st.dataframe(df, use_container_width=True)  # Usar todo el ancho disponible
 
         # Barra lateral para los filtros
         with st.sidebar.expander("Filtros", expanded=True):
@@ -46,7 +49,7 @@ if uploaded_file is not None:
 
         # Mostrar los datos filtrados
         st.write("Datos filtrados:")
-        st.dataframe(filtered_df)
+        st.dataframe(filtered_df, use_container_width=True)  # Usar todo el ancho disponible
 
     except Exception as e:
         st.error(f"Error al leer el archivo: {e}")
