@@ -17,21 +17,23 @@ if uploaded_file is not None:
         st.write("Datos cargados:")
         st.dataframe(df)
 
-        # Filtros dinámicos basados en los valores únicos de las columnas
-        if 'Categoria' in df.columns:
-            categoria = st.selectbox('Filtrar por Categoria', options=['Todos'] + df['Categoria'].unique().tolist())
-        else:
-            categoria = 'Todos'
-        
-        if 'Club' in df.columns:
-            club = st.selectbox('Filtrar por Club', options=['Todos'] + df['Club'].unique().tolist())
-        else:
-            club = 'Todos'
-        
-        if 'Genero' in df.columns:
-            genero = st.selectbox('Filtrar por Genero', options=['Todos'] + df['Genero'].unique().tolist())
-        else:
-            genero = 'Todos'
+        # Barra lateral para los filtros
+        with st.sidebar.expander("Filtros", expanded=True):
+            # Filtros dinámicos basados en los valores únicos de las columnas
+            if 'Categoria' in df.columns:
+                categoria = st.selectbox('Filtrar por Categoria', options=['Todos'] + df['Categoria'].unique().tolist())
+            else:
+                categoria = 'Todos'
+
+            if 'Club' in df.columns:
+                club = st.selectbox('Filtrar por Club', options=['Todos'] + df['Club'].unique().tolist())
+            else:
+                club = 'Todos'
+
+            if 'Genero' in df.columns:
+                genero = st.selectbox('Filtrar por Genero', options=['Todos'] + df['Genero'].unique().tolist())
+            else:
+                genero = 'Todos'
 
         # Aplicar los filtros seleccionados
         filtered_df = df.copy()
