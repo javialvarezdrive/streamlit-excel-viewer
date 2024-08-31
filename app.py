@@ -16,9 +16,10 @@ if uploaded_file is not None:
     try:
         df = pd.read_excel(uploaded_file, engine='openpyxl')
 
-        # Asegurarse de que la columna de tiempo esté en formato datetime
+        # Asegurarse de que la columna de tiempo esté en formato timedelta
         if 'Tiempo' in df.columns:
-            df['Tiempo'] = pd.to_datetime(df['Tiempo'])
+            # Convertir la columna de tiempo a timedelta
+            df['Tiempo'] = pd.to_timedelta(df['Tiempo'].astype(str))
 
         # Definir filtros por defecto
         filters = {
@@ -46,7 +47,7 @@ if uploaded_file is not None:
                     min_value=min_time,
                     max_value=max_time,
                     value=(min_time, max_time),
-                    format="YYYY-MM-DD HH:mm:ss"
+                    format="hh:mm:ss"
                 )
 
             # Botón para limpiar filtros
