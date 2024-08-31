@@ -15,14 +15,14 @@ if uploaded_file is not None:
     # Leer el archivo Excel
     try:
         df = pd.read_excel(uploaded_file, engine='openpyxl')
-        
+
         # Definir filtros por defecto
         filters = {
             'Categoria': 'Todos',
             'Club': 'Todos',
             'Genero': 'Todos'
         }
-        
+
         # Barra lateral para los filtros
         with st.sidebar.expander("Filtros", expanded=True):
             # Filtros dinámicos basados en los valores únicos de las columnas
@@ -32,7 +32,7 @@ if uploaded_file is not None:
                 filters['Club'] = st.selectbox('Filtrar por Club', options=['Todos'] + df['Club'].unique().tolist())
             if 'Genero' in df.columns:
                 filters['Genero'] = st.selectbox('Filtrar por Genero', options=['Todos'] + df['Genero'].unique().tolist())
-            
+
             # Botón para limpiar filtros
             if st.button('Limpiar Filtros'):
                 filters = {key: 'Todos' for key in filters}
@@ -46,9 +46,17 @@ if uploaded_file is not None:
         if filters['Genero'] != 'Todos':
             filtered_df = filtered_df[filtered_df['Genero'] == filters['Genero']]
 
-        # Mostrar los datos filtrados en la tabla principal
+        # Selección de columnas a mostrar
+        st.write("Selecciona las columnas que deseas ver:")
+        columnas_seleccionadas = st.multiselect(
+            "Selecciona las columnas",
+            options=filtered_df.columns.tolist(),
+            default=filtered_df.columns.tolist()  # Por defecto, mostrar todas las columnas
+        )
+
+        # Mostrar los datos filtrados con las columnas seleccionadas
         st.write("Datos:")
-        st.dataframe(filtered_df, use_container_width=True)
+        st.dataframe(filtered_df[columnas_seleccionadas], use_container_width=True)
 
     except Exception as e:
         st.error(f"Error al leer el archivo: {e}")
