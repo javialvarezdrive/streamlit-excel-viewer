@@ -4,6 +4,14 @@ import pandas as pd
 # Configuración de la página para ocupar todo el ancho
 st.set_page_config(layout="wide")
 
+# Ocultar el menú de configuración (tres puntos)
+hide_menu_style = """
+        <style>
+        #MainMenu {visibility: hidden;}
+        </style>
+        """
+st.markdown(hide_menu_style, unsafe_allow_html=True)
+
 # Configuración básica de la aplicación
 st.title('Visualización de Datos de Excel')
 st.write('Sube tu archivo Excel para visualizar y filtrar los datos.')
