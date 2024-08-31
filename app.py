@@ -15,41 +15,40 @@ if uploaded_file is not None:
     # Leer el archivo Excel
     try:
         df = pd.read_excel(uploaded_file, engine='openpyxl')
-
-        # Mostrar los datos cargados
-        st.write("Datos cargados:")
-        st.dataframe(df, use_container_width=True)  # Usar todo el ancho disponible
-
+        
+        # Definir filtros por defecto
+        filters = {
+            'Categoria': 'Todos',
+            'Club': 'Todos',
+            'Genero': 'Todos'
+        }
+        
         # Barra lateral para los filtros
         with st.sidebar.expander("Filtros", expanded=True):
             # Filtros dinámicos basados en los valores únicos de las columnas
             if 'Categoria' in df.columns:
-                categoria = st.selectbox('Filtrar por Categoria', options=['Todos'] + df['Categoria'].unique().tolist())
-            else:
-                categoria = 'Todos'
-
+                filters['Categoria'] = st.selectbox('Filtrar por Categoria', options=['Todos'] + df['Categoria'].unique().tolist())
             if 'Club' in df.columns:
-                club = st.selectbox('Filtrar por Club', options=['Todos'] + df['Club'].unique().tolist())
-            else:
-                club = 'Todos'
-
+                filters['Club'] = st.selectbox('Filtrar por Club', options=['Todos'] + df['Club'].unique().tolist())
             if 'Genero' in df.columns:
-                genero = st.selectbox('Filtrar por Genero', options=['Todos'] + df['Genero'].unique().tolist())
-            else:
-                genero = 'Todos'
+                filters['Genero'] = st.selectbox('Filtrar por Genero', options=['Todos'] + df['Genero'].unique().tolist())
+            
+            # Botón para limpiar filtros
+            if st.button('Limpiar Filtros'):
+                filters = {key: 'Todos' for key in filters}
 
         # Aplicar los filtros seleccionados
         filtered_df = df.copy()
-        if categoria != 'Todos':
-            filtered_df = filtered_df[filtered_df['Categoria'] == categoria]
-        if club != 'Todos':
-            filtered_df = filtered_df[filtered_df['Club'] == club]
-        if genero != 'Todos':
-            filtered_df = filtered_df[filtered_df['Genero'] == genero]
+        if filters['Categoria'] != 'Todos':
+            filtered_df = filtered_df[filtered_df['Categoria'] == filters['Categoria']]
+        if filters['Club'] != 'Todos':
+            filtered_df = filtered_df[filtered_df['Club'] == filters['Club']]
+        if filters['Genero'] != 'Todos':
+            filtered_df = filtered_df[filtered_df['Genero'] == filters['Genero']]
 
-        # Mostrar los datos filtrados
-        st.write("Datos filtrados:")
-        st.dataframe(filtered_df, use_container_width=True)  # Usar todo el ancho disponible
+        # Mostrar los datos filtrados en la tabla principal
+        st.write("Datos:")
+        st.dataframe(filtered_df, use_container_width=True)
 
     except Exception as e:
         st.error(f"Error al leer el archivo: {e}")
