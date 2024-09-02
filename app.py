@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from st_aggrid import AgGrid, GridOptionsBuilder
+import plotly.graph_objects as go
 
 # Configuración de la página para ocupar todo el ancho
 st.set_page_config(layout="wide")
@@ -77,23 +77,18 @@ if uploaded_file is not None:
             default=filtered_df.columns.tolist()  # Por defecto, mostrar todas las columnas
         )
 
-        # Configurar AgGrid para mostrar la tabla con opciones de ordenamiento y responsive
-        st.write("Datos:")
-        gb = GridOptionsBuilder.from_dataframe(filtered_df[columnas_seleccionadas])
-        gb.configure_pagination(paginationAutoPageSize=True)  # Paginar los datos automáticamente
-        gb.configure_side_bar()  # Añadir barra lateral para opciones adicionales
-        gb.configure_default_column(editable=True, sortable=True, resizable=True, filter=True)  # Columnas configurables
+        # Crear la tabla usando Plotly, excluyendo el índice
+        fig = go.Figure(data=[go.Table(
+            header=dict(values=list(filtered_df[columnas_seleccionadas].columns),
+                        fill_color='paleturquoise',
+                        align='left'),
+            cells=dict(values=[filtered_df[col].tolist() for col in columnas_seleccionadas],
+                       fill_color='lavender',
+                       align='left'))
+        ])
 
-        grid_options = gb.build()
-
-        # Mostrar la tabla con AgGrid
-        AgGrid(
-            filtered_df[columnas_seleccionadas],
-            gridOptions=grid_options,
-            enable_enterprise_modules=True,
-            allow_unsafe_jscode=True,
-            theme='streamlit'  # Estilo responsive
-        )
+        # Mostrar la tabla en Streamlit
+        st.plotly_chart(fig, use_container_width=True)
 
     except Exception as e:
         st.error(f"Error al leer el archivo: {e}")
