@@ -33,6 +33,10 @@ if uploaded_file is not None:
             df = pd.read_csv(uploaded_file, delimiter=delimiter)
         else:
             st.error("Tipo de archivo no soportado.")
+            st.stop()  # Detener la ejecución si el archivo no es soportado.
+
+        # Restablecer el índice para eliminar la columna de índice
+        df = df.reset_index(drop=True)
 
         # Definir filtros por defecto
         filters = {
@@ -74,7 +78,6 @@ if uploaded_file is not None:
 
         # Mostrar los datos filtrados con las columnas seleccionadas sin índice
         st.write("Datos:")
-        # Utilizando reset_index(drop=True) debería funcionar para evitar mostrar índices
         st.dataframe(filtered_df[columnas_seleccionadas].reset_index(drop=True), use_container_width=True)
 
     except Exception as e:
