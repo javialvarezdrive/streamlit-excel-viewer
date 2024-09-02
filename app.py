@@ -74,6 +74,7 @@ if uploaded_file is not None:
 
         # Mostrar los datos filtrados con las columnas seleccionadas sin índice
         st.write("Datos:")
+        # Utilizando reset_index(drop=True) debería funcionar para evitar mostrar índices
         st.dataframe(filtered_df[columnas_seleccionadas].reset_index(drop=True), use_container_width=True)
 
     except Exception as e:
