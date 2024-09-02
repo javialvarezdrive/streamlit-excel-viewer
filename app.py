@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from st_aggrid import AgGrid, GridOptionsBuilder
 
 # Configuración de la página para ocupar todo el ancho
 st.set_page_config(layout="wide")
@@ -76,12 +77,23 @@ if uploaded_file is not None:
             default=filtered_df.columns.tolist()  # Por defecto, mostrar todas las columnas
         )
 
-        # Convertir el DataFrame filtrado a HTML sin índice
-        html_table = filtered_df[columnas_seleccionadas].to_html(index=False)
-
-        # Mostrar los datos filtrados con las columnas seleccionadas como HTML
+        # Configurar AgGrid para mostrar la tabla con opciones de ordenamiento y responsive
         st.write("Datos:")
-        st.markdown(html_table, unsafe_allow_html=True)
+        gb = GridOptionsBuilder.from_dataframe(filtered_df[columnas_seleccionadas])
+        gb.configure_pagination(paginationAutoPageSize=True)  # Paginar los datos automáticamente
+        gb.configure_side_bar()  # Añadir barra lateral para opciones adicionales
+        gb.configure_default_column(editable=True, sortable=True, resizable=True, filter=True)  # Columnas configurables
+
+        grid_options = gb.build()
+
+        # Mostrar la tabla con AgGrid
+        AgGrid(
+            filtered_df[columnas_seleccionadas],
+            gridOptions=grid_options,
+            enable_enterprise_modules=True,
+            allow_unsafe_jscode=True,
+            theme='streamlit'  # Estilo responsive
+        )
 
     except Exception as e:
         st.error(f"Error al leer el archivo: {e}")
