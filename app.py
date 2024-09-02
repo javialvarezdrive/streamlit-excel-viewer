@@ -13,26 +13,16 @@ hide_menu_style = """
 st.markdown(hide_menu_style, unsafe_allow_html=True)
 
 # Configuración básica de la aplicación
-st.title('Visualización de Datos')
-st.write('Sube tu archivo para visualizar y filtrar los datos.')
+st.title('Visualización de Datos de Excel')
+st.write('Sube tu archivo Excel para visualizar y filtrar los datos.')
 
-# Subir archivo (Excel, CSV, o Texto delimitado)
-uploaded_file = st.file_uploader("Elige un archivo", type=['xlsx', 'xls', 'csv', 'txt'])
+# Subir archivo Excel
+uploaded_file = st.file_uploader("Elige un archivo Excel", type=['xlsx', 'xls'])
 
 if uploaded_file is not None:
-    # Intentar leer el archivo según su tipo
+    # Leer el archivo Excel
     try:
-        # Verificar la extensión del archivo y cargarlo adecuadamente
-        if uploaded_file.name.endswith(('xlsx', 'xls')):
-            df = pd.read_excel(uploaded_file, engine='openpyxl')
-        elif uploaded_file.name.endswith('csv'):
-            df = pd.read_csv(uploaded_file)
-        elif uploaded_file.name.endswith('txt'):
-            # Asumir un delimitador común como la coma, permitir ajuste si es necesario
-            delimiter = st.text_input('Delimitador para archivos de texto (e.g., ",", ";", "|"):', value=',')
-            df = pd.read_csv(uploaded_file, delimiter=delimiter)
-        else:
-            st.error("Tipo de archivo no soportado.")
+        df = pd.read_excel(uploaded_file, engine='openpyxl')
 
         # Definir filtros por defecto
         filters = {
@@ -72,13 +62,9 @@ if uploaded_file is not None:
             default=filtered_df.columns.tolist()  # Por defecto, mostrar todas las columnas
         )
 
-        # Mostrar los datos filtrados con las columnas seleccionadas usando st.data_editor
+        # Mostrar los datos filtrados con las columnas seleccionadas
         st.write("Datos:")
-        edited_df = st.data_editor(filtered_df[columnas_seleccionadas], use_container_width=True)
-
-        # Mostrar los datos editados, si necesitas hacer algo con ellos
-        st.write("Datos editados:")
-        st.write(edited_df)
+        st.dataframe(filtered_df[columnas_seleccionadas], use_container_width=True)
 
     except Exception as e:
         st.error(f"Error al leer el archivo: {e}")
