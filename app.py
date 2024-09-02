@@ -80,5 +80,11 @@ if uploaded_file is not None:
         st.write("Datos:")
         st.dataframe(filtered_df[columnas_seleccionadas], use_container_width=True)
 
+        # Botón para exportar los datos filtrados a un archivo CSV sin índices
+        st.write("Exportar datos:")
+        if st.button('Exportar a CSV'):
+            filtered_df[columnas_seleccionadas].to_csv('datos_filtrados.csv', index=False)
+            st.success('Archivo CSV exportado sin índices.')
+
     except Exception as e:
         st.error(f"Error al leer el archivo: {e}")
