@@ -72,9 +72,9 @@ if uploaded_file is not None:
             default=filtered_df.columns.tolist()  # Por defecto, mostrar todas las columnas
         )
 
-        # Mostrar los datos filtrados con las columnas seleccionadas
+        # Mostrar los datos filtrados con las columnas seleccionadas sin índice
         st.write("Datos:")
-        st.dataframe(filtered_df[columnas_seleccionadas], use_container_width=True)
+        st.dataframe(filtered_df[columnas_seleccionadas].reset_index(drop=True), use_container_width=True)
 
     except Exception as e:
         st.error(f"Error al leer el archivo: {e}")
