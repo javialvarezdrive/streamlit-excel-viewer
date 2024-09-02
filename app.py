@@ -79,9 +79,26 @@ if uploaded_file is not None:
         # Convertir el DataFrame filtrado a HTML sin índice
         html_table = filtered_df[columnas_seleccionadas].to_html(index=False)
 
+        # Estilos CSS para hacer la tabla responsive
+        responsive_table_style = """
+        <style>
+        .responsive-table {
+            width: 100%;
+            overflow-x: auto;
+            display: block;
+            border-collapse: collapse;
+        }
+        .responsive-table th, .responsive-table td {
+            padding: 8px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        </style>
+        """
+
         # Mostrar los datos filtrados con las columnas seleccionadas como HTML
         st.write("Datos:")
-        st.markdown(html_table, unsafe_allow_html=True)
+        st.markdown(responsive_table_style + f'<div class="responsive-table">{html_table}</div>', unsafe_allow_html=True)
 
     except Exception as e:
         st.error(f"Error al leer el archivo: {e}")
