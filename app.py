@@ -92,6 +92,3 @@ if uploaded_file is not None:
     except Exception as e:
         st.error(f"Error al leer el archivo: {e}")
 
-# Convertir el DataFrame a HTML sin la columna de índice
-html = df.to_html(index=False)
-print(html)
