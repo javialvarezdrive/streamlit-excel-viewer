@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import plotly.graph_objects as go
 
 # Configuración de la página para ocupar todo el ancho
 st.set_page_config(layout="wide")
@@ -77,18 +76,12 @@ if uploaded_file is not None:
             default=filtered_df.columns.tolist()  # Por defecto, mostrar todas las columnas
         )
 
-        # Crear la tabla usando Plotly, excluyendo el índice
-        fig = go.Figure(data=[go.Table(
-            header=dict(values=list(filtered_df[columnas_seleccionadas].columns),
-                        fill_color='paleturquoise',
-                        align='left'),
-            cells=dict(values=[filtered_df[col].tolist() for col in columnas_seleccionadas],
-                       fill_color='lavender',
-                       align='left'))
-        ])
+        # Convertir el DataFrame filtrado a HTML sin índice
+        html_table = filtered_df[columnas_seleccionadas].to_html(index=False)
 
-        # Mostrar la tabla en Streamlit
-        st.plotly_chart(fig, use_container_width=True)
+        # Mostrar los datos filtrados con las columnas seleccionadas como HTML
+        st.write("Datos:")
+        st.markdown(html_table, unsafe_allow_html=True)
 
     except Exception as e:
         st.error(f"Error al leer el archivo: {e}")
