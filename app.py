@@ -76,9 +76,12 @@ if uploaded_file is not None:
             default=filtered_df.columns.tolist()  # Por defecto, mostrar todas las columnas
         )
 
-        # Mostrar los datos filtrados con las columnas seleccionadas sin índice
+        # Convertir el DataFrame filtrado a HTML sin índice
+        html_table = filtered_df[columnas_seleccionadas].to_html(index=False)
+
+        # Mostrar los datos filtrados con las columnas seleccionadas como HTML
         st.write("Datos:")
-        st.dataframe(filtered_df[columnas_seleccionadas].reset_index(drop=True), use_container_width=True)
+        st.markdown(html_table, unsafe_allow_html=True)
 
     except Exception as e:
         st.error(f"Error al leer el archivo: {e}")
