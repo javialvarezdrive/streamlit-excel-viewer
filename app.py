@@ -13,16 +13,26 @@ hide_menu_style = """
 st.markdown(hide_menu_style, unsafe_allow_html=True)
 
 # Configuración básica de la aplicación
-st.title('Visualización de Datos de Excel')
-st.write('Sube tu archivo Excel para visualizar y filtrar los datos.')
+st.title('Visualización de Datos')
+st.write('Sube tu archivo para visualizar y filtrar los datos.')
 
-# Subir archivo Excel
-uploaded_file = st.file_uploader("Elige un archivo Excel", type=['xlsx', 'xls'])
+# Subir archivo (Excel, CSV, o Texto delimitado)
+uploaded_file = st.file_uploader("Elige un archivo", type=['xlsx', 'xls', 'csv', 'txt'])
 
 if uploaded_file is not None:
-    # Leer el archivo Excel
+    # Intentar leer el archivo según su tipo
     try:
-        df = pd.read_excel(uploaded_file, engine='openpyxl')
+        # Verificar la extensión del archivo y cargarlo adecuadamente
+        if uploaded_file.name.endswith(('xlsx', 'xls')):
+            df = pd.read_excel(uploaded_file, engine='openpyxl')
+        elif uploaded_file.name.endswith('csv'):
+            df = pd.read_csv(uploaded_file)
+        elif uploaded_file.name.endswith('txt'):
+            # Asumir un delimitador común como la coma, permitir ajuste si es necesario
+            delimiter = st.text_input('Delimitador para archivos de texto (e.g., ",", ";", "|"):', value=',')
+            df = pd.read_csv(uploaded_file, delimiter=delimiter)
+        else:
+            st.error("Tipo de archivo no soportado.")
 
         # Definir filtros por defecto
         filters = {
