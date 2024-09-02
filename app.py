@@ -76,35 +76,9 @@ if uploaded_file is not None:
             default=filtered_df.columns.tolist()  # Por defecto, mostrar todas las columnas
         )
 
-        # Convertir el DataFrame filtrado a HTML sin índice
-        html_table = filtered_df[columnas_seleccionadas].to_html(index=False)
-
-        # Estilos CSS para hacer la tabla responsive, con filas de la misma altura, y espaciado adecuado
-        responsive_table_style = """
-        <style>
-        .responsive-table {
-            width: 100%;
-            overflow-x: auto;
-            display: block;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        .responsive-table th, .responsive-table td {
-            padding: 10px; /* Aumentar el padding para mejorar la legibilidad */
-            text-align: left;
-            border: 1px solid #ddd;
-            height: 40px;  /* Establecer una altura fija y uniforme para todas las filas */
-            min-width: 100px;  /* Ancho mínimo para las celdas */
-        }
-        .responsive-table th {
-            background-color: #f4f4f4; /* Color de fondo para la cabecera */
-        }
-        </style>
-        """
-
-        # Mostrar los datos filtrados con las columnas seleccionadas como HTML
+        # Mostrar los datos filtrados con las columnas seleccionadas utilizando st.dataframe
         st.write("Datos:")
-        st.markdown(responsive_table_style + f'<div class="responsive-table">{html_table}</div>', unsafe_allow_html=True)
+        st.dataframe(filtered_df[columnas_seleccionadas], use_container_width=True)
 
     except Exception as e:
         st.error(f"Error al leer el archivo: {e}")
