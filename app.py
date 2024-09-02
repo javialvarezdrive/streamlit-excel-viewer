@@ -79,7 +79,7 @@ if uploaded_file is not None:
         # Convertir el DataFrame filtrado a HTML sin índice
         html_table = filtered_df[columnas_seleccionadas].to_html(index=False)
 
-        # Estilos CSS para hacer la tabla responsive
+        # Estilos CSS para hacer la tabla responsive y con filas de la misma altura
         responsive_table_style = """
         <style>
         .responsive-table {
@@ -92,6 +92,7 @@ if uploaded_file is not None:
             padding: 8px;
             text-align: left;
             border: 1px solid #ddd;
+            height: 40px;  /* Establecer una altura fija y uniforme para todas las filas */
         }
         </style>
         """
