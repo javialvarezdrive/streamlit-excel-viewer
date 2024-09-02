@@ -20,6 +20,7 @@ st.write('Sube tu archivo para visualizar y filtrar los datos.')
 uploaded_file = st.file_uploader("Elige un archivo", type=['xlsx', 'xls', 'csv', 'txt'])
 
 if uploaded_file is not None:
+    # Intentar leer el archivo según su tipo
     try:
         # Verificar la extensión del archivo y cargarlo adecuadamente
         if uploaded_file.name.endswith(('xlsx', 'xls')):
@@ -27,14 +28,11 @@ if uploaded_file is not None:
         elif uploaded_file.name.endswith('csv'):
             df = pd.read_csv(uploaded_file)
         elif uploaded_file.name.endswith('txt'):
+            # Asumir un delimitador común como la coma, permitir ajuste si es necesario
             delimiter = st.text_input('Delimitador para archivos de texto (e.g., ",", ";", "|"):', value=',')
             df = pd.read_csv(uploaded_file, delimiter=delimiter)
         else:
             st.error("Tipo de archivo no soportado.")
-
-        # Convertir columnas a numéricas si es necesario
-        for col in df.columns:
-            df[col] = pd.to_numeric(df[col], errors='coerce')  # Convertir a numérico y manejar errores
 
         # Definir filtros por defecto
         filters = {
@@ -45,12 +43,13 @@ if uploaded_file is not None:
 
         # Barra lateral para los filtros
         with st.sidebar.expander("Filtros", expanded=True):
+            # Filtros dinámicos basados en los valores únicos de las columnas
             if 'Categoria' in df.columns:
-                filters['Categoria'] = st.selectbox('Filtrar por Categoria', options=['Todos'] + df['Categoria'].dropna().unique().tolist())
+                filters['Categoria'] = st.selectbox('Filtrar por Categoria', options=['Todos'] + df['Categoria'].unique().tolist())
             if 'Club' in df.columns:
-                filters['Club'] = st.selectbox('Filtrar por Club', options=['Todos'] + df['Club'].dropna().unique().tolist())
+                filters['Club'] = st.selectbox('Filtrar por Club', options=['Todos'] + df['Club'].unique().tolist())
             if 'Genero' in df.columns:
-                filters['Genero'] = st.selectbox('Filtrar por Genero', options=['Todos'] + df['Genero'].dropna().unique().tolist())
+                filters['Genero'] = st.selectbox('Filtrar por Genero', options=['Todos'] + df['Genero'].unique().tolist())
 
             # Botón para limpiar filtros
             if st.button('Limpiar Filtros'):
@@ -70,12 +69,25 @@ if uploaded_file is not None:
         columnas_seleccionadas = st.multiselect(
             "Selecciona las columnas",
             options=filtered_df.columns.tolist(),
-            default=filtered_df.columns.tolist()
+            default=filtered_df.columns.tolist()  # Por defecto, mostrar todas las columnas
         )
 
-        # Mostrar los datos filtrados con las columnas seleccionadas
+        # Aplicar estilos al DataFrame usando Styler
+        styled_df = filtered_df[columnas_seleccionadas].style\
+            .format(precision=2, na_rep='-')\
+            .highlight_max(axis=0, color='lightblue')\
+            .highlight_min(axis=0, color='lightcoral')\
+            .set_caption("Tabla de datos filtrados con estilo aplicado")\
+            .set_table_styles({
+                'all': [
+                    {'selector': 'th', 'props': [('font-size', '16px'), ('text-align', 'center')]},
+                    {'selector': 'td', 'props': [('padding', '6px'), ('border', '1px solid #ddd')]},
+                ]
+            })
+
+        # Mostrar los datos filtrados con las columnas seleccionadas y estilos aplicados
         st.write("Datos:")
-        st.dataframe(filtered_df[columnas_seleccionadas], use_container_width=True)
+        st.dataframe(styled_df, use_container_width=True)
 
     except Exception as e:
         st.error(f"Error al leer el archivo: {e}")
