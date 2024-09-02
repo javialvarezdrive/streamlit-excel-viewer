@@ -72,9 +72,22 @@ if uploaded_file is not None:
             default=filtered_df.columns.tolist()  # Por defecto, mostrar todas las columnas
         )
 
-        # Mostrar los datos filtrados con las columnas seleccionadas
+        # Aplicar estilos al DataFrame usando Styler
+        styled_df = filtered_df[columnas_seleccionadas].style\
+            .format(precision=2, na_rep='-')\
+            .highlight_max(axis=0, color='lightblue')\
+            .highlight_min(axis=0, color='lightcoral')\
+            .set_caption("Tabla de datos filtrados con estilo aplicado")\
+            .set_table_styles({
+                'all': [
+                    {'selector': 'th', 'props': [('font-size', '16px'), ('text-align', 'center')]},
+                    {'selector': 'td', 'props': [('padding', '6px'), ('border', '1px solid #ddd')]},
+                ]
+            })
+
+        # Mostrar los datos filtrados con las columnas seleccionadas y estilos aplicados
         st.write("Datos:")
-        st.dataframe(filtered_df[columnas_seleccionadas], use_container_width=True)
+        st.dataframe(styled_df, use_container_width=True)
 
     except Exception as e:
         st.error(f"Error al leer el archivo: {e}")
