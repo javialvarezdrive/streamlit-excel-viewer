@@ -56,6 +56,9 @@ if uploaded_file is not None:
             if selected != 'Todos':
                 filtered_df = filtered_df[filtered_df[col] == selected]
 
+        # Resetea el índice y elimina la columna de índice
+        filtered_df.reset_index(drop=True, inplace=True)
+
         # Selección de columnas a mostrar
         st.write("Selecciona las columnas que deseas ver:")
         columnas_seleccionadas = st.multiselect(
@@ -64,9 +67,9 @@ if uploaded_file is not None:
             default=filtered_df.columns.tolist()  # Por defecto, mostrar todas las columnas
         )
 
-        # Mostrar los datos filtrados con las columnas seleccionadas, sin índice
+        # Mostrar los datos filtrados con las columnas seleccionadas
         st.write("Datos:")
-        st.dataframe(filtered_df[columnas_seleccionadas].reset_index(drop=True), use_container_width=True)
+        st.dataframe(filtered_df[columnas_seleccionadas], use_container_width=True)
 
     except ValueError as ve:
         st.error(f"Error en la lectura del archivo: {ve}. Verifique el formato y contenido del archivo.")
