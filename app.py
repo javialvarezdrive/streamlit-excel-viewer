@@ -19,40 +19,42 @@ st.write('Sube tu archivo Excel para visualizar y filtrar los datos.')
 # Subir archivo Excel
 uploaded_file = st.file_uploader("Elige un archivo Excel", type=['xlsx', 'xls'])
 
+# Estado de sesión para filtros
+if 'filters' not in st.session_state:
+    st.session_state.filters = {
+        'Categoria': 'Todos',
+        'Club': 'Todos',
+        'Genero': 'Todos'
+    }
+
+def reset_filters():
+    st.session_state.filters = {key: 'Todos' for key in st.session_state.filters}
+
 if uploaded_file is not None:
     # Leer el archivo Excel
     try:
         df = pd.read_excel(uploaded_file, engine='openpyxl')
 
-        # Definir filtros por defecto
-        filters = {
-            'Categoria': 'Todos',
-            'Club': 'Todos',
-            'Genero': 'Todos'
-        }
-
         # Barra lateral para los filtros
         with st.sidebar.expander("Filtros", expanded=True):
             # Filtros dinámicos basados en los valores únicos de las columnas
-            if 'Categoria' in df.columns:
-                filters['Categoria'] = st.selectbox('Filtrar por Categoria', options=['Todos'] + df['Categoria'].unique().tolist())
-            if 'Club' in df.columns:
-                filters['Club'] = st.selectbox('Filtrar por Club', options=['Todos'] + df['Club'].unique().tolist())
-            if 'Genero' in df.columns:
-                filters['Genero'] = st.selectbox('Filtrar por Genero', options=['Todos'] + df['Genero'].unique().tolist())
+            for col in ['Categoria', 'Club', 'Genero']:
+                if col in df.columns:
+                    options = ['Todos'] + sorted(df[col].dropna().unique().tolist())
+                    st.session_state.filters[col] = st.selectbox(
+                        f'Filtrar por {col}', 
+                        options=options, 
+                        index=options.index(st.session_state.filters[col])
+                    )
 
             # Botón para limpiar filtros
-            if st.button('Limpiar Filtros'):
-                filters = {key: 'Todos' for key in filters}
+            st.button('Limpiar Filtros', on_click=reset_filters)
 
         # Aplicar los filtros seleccionados
         filtered_df = df.copy()
-        if filters['Categoria'] != 'Todos':
-            filtered_df = filtered_df[filtered_df['Categoria'] == filters['Categoria']]
-        if filters['Club'] != 'Todos':
-            filtered_df = filtered_df[filtered_df['Club'] == filters['Club']]
-        if filters['Genero'] != 'Todos':
-            filtered_df = filtered_df[filtered_df['Genero'] == filters['Genero']]
+        for col, selected in st.session_state.filters.items():
+            if selected != 'Todos':
+                filtered_df = filtered_df[filtered_df[col] == selected]
 
         # Selección de columnas a mostrar
         st.write("Selecciona las columnas que deseas ver:")
@@ -66,5 +68,7 @@ if uploaded_file is not None:
         st.write("Datos:")
         st.dataframe(filtered_df[columnas_seleccionadas], use_container_width=True)
 
+    except ValueError as ve:
+        st.error(f"Error en la lectura del archivo: {ve}. Verifique el formato y contenido del archivo.")
     except Exception as e:
-        st.error(f"Error al leer el archivo: {e}")
+        st.error(f"Error inesperado: {e}.")
