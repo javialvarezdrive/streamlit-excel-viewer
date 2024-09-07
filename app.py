@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import plotly.graph_objects as go
 
 # Configuración de la página para ocupar todo el ancho
 st.set_page_config(layout="wide")
@@ -67,9 +68,19 @@ if uploaded_file is not None:
             default=filtered_df.columns.tolist()  # Por defecto, mostrar todas las columnas
         )
 
-        # Mostrar los datos filtrados con las columnas seleccionadas
+        # Crear la tabla con Plotly
+        fig = go.Figure(data=[go.Table(
+            header=dict(values=list(filtered_df[columnas_seleccionadas].columns),
+                        fill_color='paleturquoise',
+                        align='left'),
+            cells=dict(values=[filtered_df[col].tolist() for col in columnas_seleccionadas],
+                       fill_color='lavender',
+                       align='left'))
+        ])
+
+        # Mostrar la tabla
         st.write("Datos:")
-        st.dataframe(filtered_df[columnas_seleccionadas], use_container_width=True)
+        st.plotly_chart(fig)
 
     except ValueError as ve:
         st.error(f"Error en la lectura del archivo: {ve}. Verifique el formato y contenido del archivo.")
