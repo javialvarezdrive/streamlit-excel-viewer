@@ -9,6 +9,7 @@ st.set_page_config(layout="wide")
 hide_menu_style = """
         <style>
         #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
         </style>
         """
 st.markdown(hide_menu_style, unsafe_allow_html=True)
@@ -68,19 +69,34 @@ if uploaded_file is not None:
             default=filtered_df.columns.tolist()  # Por defecto, mostrar todas las columnas
         )
 
-        # Crear la tabla con Plotly
+        # Crear la tabla con Plotly con estilo avanzado
         fig = go.Figure(data=[go.Table(
-            header=dict(values=list(filtered_df[columnas_seleccionadas].columns),
-                        fill_color='paleturquoise',
-                        align='left'),
-            cells=dict(values=[filtered_df[col].tolist() for col in columnas_seleccionadas],
-                       fill_color='lavender',
-                       align='left'))
-        ])
+            header=dict(
+                values=[f'<b>{col}</b>' for col in columnas_seleccionadas],
+                fill_color='#1f77b4',
+                font=dict(color='white', size=12),
+                align='center',
+                line_color='darkslategray',
+                height=30,  # Ajusta la altura de las celdas de encabezado
+            ),
+            cells=dict(
+                values=[filtered_df[col].tolist() for col in columnas_seleccionadas],
+                fill_color='lavender',
+                align='center',
+                line_color='darkslategray',
+                height=30,  # Ajusta la altura de las filas
+            )
+        )])
+
+        # Ajustar el layout para hacer la tabla responsiva
+        fig.update_layout(
+            margin=dict(l=0, r=0, t=0, b=0),  # Márgenes compactos
+            height=600,  # Altura ajustable de la tabla
+        )
 
         # Mostrar la tabla
         st.write("Datos:")
-        st.plotly_chart(fig)
+        st.plotly_chart(fig, use_container_width=True)
 
     except ValueError as ve:
         st.error(f"Error en la lectura del archivo: {ve}. Verifique el formato y contenido del archivo.")
