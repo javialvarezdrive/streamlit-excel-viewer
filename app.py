@@ -79,8 +79,8 @@ if uploaded_file is not None:
         # Mostrar el número de registros
         st.write(f"Datos (Total de registros: {len(filtered_df)}):")
 
-        # Mostrar la tabla interactiva con st.dataframe
-        st.dataframe(filtered_df[columnas_seleccionadas], use_container_width=True)
+        # Mostrar la tabla sin la columna índice utilizando st.write y hide_index()
+        st.write(filtered_df[columnas_seleccionadas].style.hide_index())
 
     except ValueError as ve:
         st.error(f"Error en la lectura del archivo: {ve}. Verifique el formato y contenido del archivo.")
