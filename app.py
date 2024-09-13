@@ -79,8 +79,12 @@ if uploaded_file is not None:
         # Mostrar el número de registros
         st.write(f"Datos (Total de registros: {len(filtered_df)}):")
 
-        # Mostrar la tabla sin la columna índice utilizando st.write y hide_index()
-        st.write(filtered_df[columnas_seleccionadas].style.hide_index())
+        # Eliminar la columna de índice del DataFrame antes de mostrarlo
+        df_to_display = filtered_df[columnas_seleccionadas].copy()
+        df_to_display.index = [''] * len(df_to_display)
+
+        # Mostrar la tabla sin la columna de índice
+        st.table(df_to_display)
 
     except ValueError as ve:
         st.error(f"Error en la lectura del archivo: {ve}. Verifique el formato y contenido del archivo.")
