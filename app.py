@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from st_aggrid import AgGrid, GridOptionsBuilder
 
 # Configuración de la página para ocupar todo el ancho
 st.set_page_config(layout="wide")
@@ -54,39 +55,4 @@ if uploaded_file is not None:
                         index=options.index(selected_option)
                     )
                 else:
-                    st.warning(f"La columna '{col}' no se encontró en el archivo.")
-
-            # Botón para limpiar filtros
-            st.button('Limpiar Filtros', on_click=reset_filters)
-
-        # Aplicar los filtros seleccionados
-        filtered_df = df.copy()
-        for col, selected in st.session_state.filters.items():
-            if selected != 'Todos' and col in filtered_df.columns:
-                filtered_df = filtered_df[filtered_df[col] == selected]
-
-        # Resetea el índice y elimina la columna de índice
-        filtered_df.reset_index(drop=True, inplace=True)
-
-        # Selección de columnas a mostrar
-        st.write("Selecciona las columnas que deseas ver:")
-        columnas_seleccionadas = st.multiselect(
-            "Selecciona las columnas",
-            options=filtered_df.columns.tolist(),
-            default=filtered_df.columns.tolist()  # Por defecto, mostrar todas las columnas
-        )
-
-        # Mostrar el número de registros
-        st.write(f"Datos (Total de registros: {len(filtered_df)}):")
-
-        # Eliminar la columna de índice del DataFrame antes de mostrarlo
-        df_to_display = filtered_df[columnas_seleccionadas].copy()
-        df_to_display.index = [''] * len(df_to_display)
-
-        # Mostrar la tabla sin la columna de índice
-        st.table(df_to_display)
-
-    except ValueError as ve:
-        st.error(f"Error en la lectura del archivo: {ve}. Verifique el formato y contenido del archivo.")
-    except Exception as e:
-        st.error(f"Error inesperado: {e}.")
+                    st.warning(f"La columna '{col}' no s
