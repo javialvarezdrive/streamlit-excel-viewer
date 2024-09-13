@@ -15,96 +15,98 @@ hide_menu_style = """
 st.markdown(hide_menu_style, unsafe_allow_html=True)
 
 # Configuración básica de la aplicación
-st.title('Visualización de Datos de Excel')
-st.write('Sube tu archivo Excel para visualizar y filtrar los datos.')
+st.title('Visualización de Datos')
+st.write('Sube tu archivo Excel o CSV para visualizar y filtrar los datos.')
 
-# Subir archivo Excel
-uploaded_file = st.file_uploader("Elige un archivo Excel", type=['xlsx', 'xls'])
+# Subir archivo Excel o CSV
+uploaded_file = st.file_uploader("Elige un archivo Excel o CSV", type=['xlsx', 'xls', 'csv'])
 
 # Estado de sesión para filtros
 if 'filters' not in st.session_state:
-    st.session_state.filters = {}
+    st.session_state.filters = {
+        'Categoria': 'Todos',
+        'Club': 'Todos',
+        'Genero': 'Todos'
+    }
 
 def reset_filters():
-    st.session_state.filters = {}
-    st.experimental_rerun()
+    st.session_state.filters = {key: 'Todos' for key in st.session_state.filters}
 
 if uploaded_file is not None:
-    # Leer el archivo Excel
+    # Leer el archivo Excel o CSV
     try:
-        df = pd.read_excel(uploaded_file, engine='openpyxl')
-    except Exception as e:
-        st.error(f"Error al leer el archivo: {e}")
-        st.stop()
+        if uploaded_file.name.endswith('.csv'):
+            df = pd.read_csv(uploaded_file)
+        else:
+            df = pd.read_excel(uploaded_file, engine='openpyxl')
 
-    # Validar columnas requeridas
-    required_columns = ['Categoria', 'Club', 'Genero']
-    missing_columns = [col for col in required_columns if col not in df.columns]
-    if missing_columns:
-        st.error(f"Las siguientes columnas faltan en el archivo: {', '.join(missing_columns)}")
-        st.stop()
+        # Barra lateral para los filtros
+        with st.sidebar.expander("Filtros", expanded=True):
+            # Filtros dinámicos basados en los valores únicos de las columnas
+            for col in ['Categoria', 'Club', 'Genero']:
+                if col in df.columns:
+                    options = ['Todos'] + sorted(df[col].dropna().unique().tolist())
+                    selected_option = st.session_state.filters.get(col, 'Todos')
+                    if selected_option not in options:
+                        selected_option = 'Todos'
+                    st.session_state.filters[col] = st.selectbox(
+                        f'Filtrar por {col}', 
+                        options=options, 
+                        index=options.index(selected_option)
+                    )
+                else:
+                    st.warning(f"La columna '{col}' no se encontró en el archivo.")
 
-    # Barra lateral para los filtros
-    with st.sidebar.expander("Filtros", expanded=True):
-        for col in required_columns:
-            options = ['Todos'] + sorted(df[col].dropna().unique().tolist())
-            selected = st.selectbox(f'Filtrar por {col}', options, key=col)
-            if selected != 'Todos':
-                st.session_state.filters[col] = selected
-            else:
-                st.session_state.filters.pop(col, None)
+            # Botón para limpiar filtros
+            st.button('Limpiar Filtros', on_click=reset_filters)
 
-        # Botón para limpiar filtros
-        st.button('Limpiar Filtros', on_click=reset_filters)
+        # Aplicar los filtros seleccionados
+        filtered_df = df.copy()
+        for col, selected in st.session_state.filters.items():
+            if selected != 'Todos' and col in filtered_df.columns:
+                filtered_df = filtered_df[filtered_df[col] == selected]
 
-    # Aplicar los filtros seleccionados
-    filtered_df = df.copy()
-    for col, selected in st.session_state.filters.items():
-        filtered_df = filtered_df[filtered_df[col] == selected]
+        # Resetea el índice y elimina la columna de índice
+        filtered_df.reset_index(drop=True, inplace=True)
 
-    # Resetea el índice y elimina la columna de índice
-    filtered_df.reset_index(drop=True, inplace=True)
-
-    # Limitar a las primeras 1000 filas
-    max_rows = 1000
-    if len(filtered_df) > max_rows:
-        st.warning(f"Mostrando las primeras {max_rows} filas de {len(filtered_df)} filas totales.")
-        filtered_df = filtered_df.head(max_rows)
-
-    # Selección de columnas a mostrar
-    st.write("Selecciona las columnas que deseas ver:")
-    all_columns = filtered_df.columns.tolist()
-    columnas_seleccionadas = st.multiselect(
-        "Selecciona las columnas",
-        options=all_columns,
-        default=all_columns
-    )
-
-    # Crear la tabla con Plotly
-    fig = go.Figure(data=[go.Table(
-        header=dict(
-            values=[f'<b>{col}</b>' for col in columnas_seleccionadas],
-            fill_color='#1f77b4',
-            font=dict(color='white', size=12),
-            align='center',
-            line_color='darkslategray',
-            height=30,
-        ),
-        cells=dict(
-            values=[filtered_df[col].tolist() for col in columnas_seleccionadas],
-            fill_color='lavender',
-            align='center',
-            line_color='darkslategray',
-            height=30,
+        # Selección de columnas a mostrar
+        st.write("Selecciona las columnas que deseas ver:")
+        columnas_seleccionadas = st.multiselect(
+            "Selecciona las columnas",
+            options=filtered_df.columns.tolist(),
+            default=filtered_df.columns.tolist()  # Por defecto, mostrar todas las columnas
         )
-    )])
 
-    # Ajustar el layout
-    fig.update_layout(
-        margin=dict(l=0, r=0, t=0, b=0),
-        height=600,
-    )
+        # Crear la tabla con Plotly con estilo avanzado
+        fig = go.Figure(data=[go.Table(
+            header=dict(
+                values=[f'<b>{col}</b>' for col in columnas_seleccionadas],
+                fill_color='#1f77b4',
+                font=dict(color='white', size=12),
+                align='center',
+                line_color='darkslategray',
+                height=30,  # Ajusta la altura de las celdas de encabezado
+            ),
+            cells=dict(
+                values=[filtered_df[col].tolist() for col in columnas_seleccionadas],
+                fill_color='lavender',
+                align='center',
+                line_color='darkslategray',
+                height=30,  # Ajusta la altura de las filas
+            )
+        )])
 
-    # Mostrar la tabla
-    st.write("Datos:")
-    st.plotly_chart(fig, use_container_width=True)
+        # Ajustar el layout para hacer la tabla responsiva
+        fig.update_layout(
+            margin=dict(l=0, r=0, t=0, b=0),  # Márgenes compactos
+            height=600,  # Altura ajustable de la tabla
+        )
+
+        # Mostrar la tabla
+        st.write(f"Datos (Total de registros: {len(filtered_df)}):")
+        st.plotly_chart(fig, use_container_width=True)
+
+    except ValueError as ve:
+        st.error(f"Error en la lectura del archivo: {ve}. Verifique el formato y contenido del archivo.")
+    except Exception as e:
+        st.error(f"Error inesperado: {e}.")
