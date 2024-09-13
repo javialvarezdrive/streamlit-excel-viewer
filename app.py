@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import plotly.graph_objects as go
 
 # Configuración de la página para ocupar todo el ancho
 st.set_page_config(layout="wide")
@@ -77,34 +76,11 @@ if uploaded_file is not None:
             default=filtered_df.columns.tolist()  # Por defecto, mostrar todas las columnas
         )
 
-        # Crear la tabla con Plotly con estilo avanzado
-        fig = go.Figure(data=[go.Table(
-            header=dict(
-                values=[f'<b>{col}</b>' for col in columnas_seleccionadas],
-                fill_color='#1f77b4',
-                font=dict(color='white', size=12),
-                align='center',
-                line_color='darkslategray',
-                height=30,  # Ajusta la altura de las celdas de encabezado
-            ),
-            cells=dict(
-                values=[filtered_df[col].tolist() for col in columnas_seleccionadas],
-                fill_color='lavender',
-                align='center',
-                line_color='darkslategray',
-                height=30,  # Ajusta la altura de las filas
-            )
-        )])
-
-        # Ajustar el layout para hacer la tabla responsiva
-        fig.update_layout(
-            margin=dict(l=0, r=0, t=0, b=0),  # Márgenes compactos
-            height=600,  # Altura ajustable de la tabla
-        )
-
-        # Mostrar la tabla
+        # Mostrar el número de registros
         st.write(f"Datos (Total de registros: {len(filtered_df)}):")
-        st.plotly_chart(fig, use_container_width=True)
+
+        # Mostrar la tabla interactiva con st.dataframe
+        st.dataframe(filtered_df[columnas_seleccionadas], use_container_width=True)
 
     except ValueError as ve:
         st.error(f"Error en la lectura del archivo: {ve}. Verifique el formato y contenido del archivo.")
